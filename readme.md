@@ -14,7 +14,7 @@ Currently built Projects:
 1. [CLI Based To-Do Application](CLI-Based-To-Do-Application/)
 
 Upcoming Projects:
-- [ ] Student Grade Management System (CLI Based)
+- [ ] Student Grade Management System (CLI Based) [currently ongoing]
 - [ ] Bank Account Simulator (CLI Based)
 - [ ] Password Manager (CLI Based)
 - [ ] Library Management System (CLI Based)
