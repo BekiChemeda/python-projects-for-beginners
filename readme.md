@@ -12,9 +12,8 @@ Currently built Projects:
 
 ### Phase-1: Core Python and OOPs Projects
 1. [CLI Based To-Do Application](CLI-Based-To-Do-Application/)
-
+2. Student Grade Management System (CLI Based) [currently ongoing]
 Upcoming Projects:
-- [ ] Student Grade Management System (CLI Based) [currently ongoing]
 - [ ] Bank Account Simulator (CLI Based)
 - [ ] Password Manager (CLI Based)
 - [ ] Library Management System (CLI Based)
