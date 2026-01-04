@@ -3,7 +3,8 @@ import os
 import random
 file_path = os.path.join(os.path.dirname(__file__), "urls.json")
 class Link:
-    def __init__(self):
+    def __init__(self, base_link="http://short.ly/"):
+        self.base_link = base_link
         self.chars = ["A","B","C","D","E","F","J","K","L","M"]
         self.link_length = 5
         self.file_checker()
@@ -55,7 +56,7 @@ class Link:
             for a in range(self.link_length):
                 i = random.randint(0,len(self.chars)-1)
                 short_link.append(self.chars[i])
-            return link, str(short_link)
+            return link, self.base_link + "".join(short_link)
         except Exception as e:
             print(e)
     def shorten(self, link):
