@@ -3,7 +3,7 @@ from Link import Link
 link = Link()
 
 text = """
-Welcome to link My Link Shortener 
+Welcome to My Link Shortener 
 ********************************
 Follow this Commands to navigate:
     1. Shorten Link
@@ -28,8 +28,10 @@ while True:
         elif int(command) == 2:
             shortened_link = input("Enter Shortened link to check: ").strip()
             normal_link = link.generated_before(shortened_link)
-            print(f"Your Input: {shortened_link} \n"
-                    f"Normal Link: {normal_link}")
+            print(f" {shortened_link} \n"
+                  "Redirects you to ....\n")
+            time.sleep(1.5)
+            print(f"{normal_link}")
         elif int(command) == 3:
             urls = link.list_all()
             print(f"Number of total shortened links: {len(urls)}")
