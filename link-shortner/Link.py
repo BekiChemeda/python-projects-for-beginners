@@ -111,4 +111,18 @@ class Link:
         except Exception as e:
             print("Error happened while listing them down")
             logger.error(f"Error happened while listing them down: {e}")
-            
+            return []
+    
+    def delete_link(self, shortened_link):
+        try:
+            with open(file_path, "r") as f:
+                urls = json.load(f)
+            updated_urls = [url for url in urls if url["shortened_link"] != shortened_link]
+            with open(file_path, "w") as f:
+                json.dump(updated_urls, f, indent=4)
+            logger.info(f"Link deleted successfully: {shortened_link}")
+            return True
+        except Exception as e:
+            print("Error happened while deleting the link")
+            logger.error(f"Error happened while deleting the link: {e}")
+            return False

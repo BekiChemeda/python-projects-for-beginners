@@ -9,6 +9,8 @@ Follow this Commands to navigate:
     1. Shorten Link
     2. Check Redirect Link
     3. List all Links 
+    4. Delete a Link
+    0. Exit
 """
 
 while True:
@@ -19,7 +21,7 @@ while True:
             input_link = input("Enter Link to shorten: ").strip()
             if link.is_link(input_link):
                 print(link.shorten)
-                (input_linklink, shortened_link) = link.shorten(input_link)
+                (input_link, shortened_link) = link.shorten(input_link)
                 print(f"Your Input: {input_link} \n"
                       f"Shortened Link: {shortened_link}")
             else: 
@@ -41,3 +43,16 @@ while True:
                 print(f"Shortened Link: {url["shortened_link"]}")
                 print("*********************************")
                 time.sleep(2)
+        elif int(command) == 4:
+            shortened_link = input("Enter Shortened link to delete: ").strip()
+            if link.delete_link(shortened_link):
+                print(f"Successfully deleted {shortened_link}")
+            else:
+                print(f"Failed to delete {shortened_link}. It may not exist.")
+        elif int(command) == 0:
+            print("Exiting... Goodbye!")
+            break
+        else:
+            print("Invalid command. Please try again.")
+    else:
+        print("Please enter a valid number for the command.")
