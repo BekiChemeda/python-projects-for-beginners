@@ -12,14 +12,15 @@ Currently built Projects:
 
 ### Phase-1: Core Python and OOPs Projects
 1. [CLI Based To-Do Application](CLI-Based-To-Do-Application/)
-2. Student Grade Management System (CLI Based) [currently ongoing]
+2. URL Shortener Logic (CLI Based)
+3. Student Grade Management System (CLI Based) [currently ongoing]
+
 Upcoming Projects:
 - [ ] Bank Account Simulator (CLI Based)
 - [ ] Password Manager (CLI Based)
 - [ ] Library Management System (CLI Based)
 - [ ] Quiz Application (CLI Based)
 - [ ] File Organizer (CLI Based)
-- [ ] URL Shortener Logic (CLI Based)
 ### Contribution Guidelines
 Contributions are welcome! If you have a project idea or improvements for existing projects or your own projects, please follow these steps:
 1. Fork the repository.
