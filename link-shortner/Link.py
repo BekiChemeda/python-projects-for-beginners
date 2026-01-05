@@ -39,6 +39,12 @@ class Link:
             logger.error("Error happened while checking whether the link is mapped before")
             return False
     def generated_before(self,shortened_link):
+        """
+        This method checks whether the generated link is already present in the json file. This is to avoid duplication of shortened links.
+        
+        :param self: Description
+        :param shortened_link: Description
+        """
         try:
             with open(file_path, "r") as f:
                 urls = json.load(f)
@@ -87,7 +93,7 @@ class Link:
             if available_link:
                 return available_link
             link, generated_link = self.generate(link)
-            while self.generated_before(link):
+            while self.generated_before(generated_link):
                 link, generated_link = self.generate(link)
             self.save(link,generated_link)
             logger.error("Link shortening Successfull")
@@ -104,3 +110,5 @@ class Link:
             return urls
         except Exception as e:
             print("Error happened while listing them down")
+            logger.error(f"Error happened while listing them down: {e}")
+            
