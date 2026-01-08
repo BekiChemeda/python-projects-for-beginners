@@ -1,15 +1,36 @@
 
 import os
 import json
+from pathlib import Path
 
 class Bank:
-    def __init__(self,first,last,age):
-        self.first = first
-        self.last = last
-        self.age= age
-        self.account_length = 10
-        self.initiate_file()
-        print(self.generate_account())
+    BASE_DIR = Path(__file__).resolve().parent
+    ACCOUNTS_FILE = BASE_DIR / "accounts.json"
+    SETTINGS_FILE = BASE_DIR / "settings.json"
+    def __init__(self, first_name: str, last_name: str, age: int):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.age = age
+        self._initialize_files()
+
+    def _initialize_files(self) -> None:
+        if not self.ACCOUNTS_FILE.exists():
+            self._write_json(self.ACCOUNTS_FILE, [])
+
+        if not self.SETTINGS_FILE.exists():
+            self._write_json(self.SETTINGS_FILE, {"last_account": 1000})
+
+    # JSON Utilities 
+
+    @staticmethod
+    def _read_json(path: Path):
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+
+    @staticmethod
+    def _write_json(path: Path, data) -> None:
+        with path.open("w", encoding="utf-8") as file:
+            json.dump(data, file, indent=4)
         
      #This method initiate accounts.json and settings.json files
     def initiate_file(self):
