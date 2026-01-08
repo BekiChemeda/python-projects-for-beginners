@@ -6,7 +6,7 @@ class Bank:
     def __init__(self,first,last,age):
         self.first = first
         self.last = last
-        self.age = age
+        self.age= age
         self.account_length = 10
         self.initiate_file()
         print(self.generate_account())
@@ -68,5 +68,8 @@ class Bank:
     def generate_account(self):
         self.increment_acc()
         return self.last_account()
-            
+    def save_account(self):
+        full_name = self.first + self.last
+        account_number = self.generate_account()
+        
 bank = Bank("Beki","Chemeda",18)
