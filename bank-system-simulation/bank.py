@@ -1,96 +1,143 @@
-
-import os
 import json
 from pathlib import Path
+from abc import ABC, abstractmethod
+
+
+# =========================
+# Account Models
+# =========================
+
+class Account(ABC):
+    def __init__(self, account_number: int, owner: str, balance: float = 0.0):
+        self.account_number = account_number
+        self.owner = owner
+        self.balance = balance
+
+    def deposit(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("Deposit amount must be positive")
+        self.balance += amount
+
+    @abstractmethod
+    def withdraw(self, amount: float) -> None:
+        pass
+
+
+class SavingsAccount(Account):
+    def withdraw(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("Withdrawal amount must be positive")
+
+        if amount > self.balance:
+            raise ValueError("Insufficient funds")
+
+        self.balance -= amount
+
+
+class CurrentAccount(Account):
+    def __init__(
+        self,
+        account_number: int,
+        owner: str,
+        balance: float = 0.0,
+        overdraft_limit: float = 500.0
+    ):
+        super().__init__(account_number, owner, balance)
+        self.overdraft_limit = overdraft_limit
+
+    def withdraw(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("Withdrawal amount must be positive")
+
+        if amount > self.balance + self.overdraft_limit:
+            raise ValueError("Overdraft limit exceeded")
+
+        self.balance -= amount
+
+
+# =========================
+# Bank System
+# =========================
 
 class Bank:
-    BASE_DIR = Path(__file__).resolve().parent
-    ACCOUNTS_FILE = BASE_DIR / "accounts.json"
-    SETTINGS_FILE = BASE_DIR / "settings.json"
-    def __init__(self, first_name: str, last_name: str, age: int):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.age = age
-        self._initialize_files()
+    DATA_FILE = Path(__file__).resolve().parent / "accounts.json"
 
-    def _initialize_files(self) -> None:
-        if not self.ACCOUNTS_FILE.exists():
-            self._write_json(self.ACCOUNTS_FILE, [])
+    def __init__(self):
+        if not self.DATA_FILE.exists():
+            self._write_data({})
 
-        if not self.SETTINGS_FILE.exists():
-            self._write_json(self.SETTINGS_FILE, {"last_account": 1000})
+    def _read_data(self) -> dict:
+        with self.DATA_FILE.open("r", encoding="utf-8") as f:
+            return json.load(f)
 
-    # JSON Utilities 
+    def _write_data(self, data: dict) -> None:
+        with self.DATA_FILE.open("w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
 
-    @staticmethod
-    def _read_json(path: Path):
-        with path.open("r", encoding="utf-8") as file:
-            return json.load(file)
+    def _generate_account_number(self) -> int:
+        data = self._read_data()
+        return max(map(int, data.keys()), default=1000) + 1
 
-    @staticmethod
-    def _write_json(path: Path, data) -> None:
-        with path.open("w", encoding="utf-8") as file:
-            json.dump(data, file, indent=4)
-        
-     #This method initiate accounts.json and settings.json files
-    def initiate_file(self):
-        if not os.path.exists(os.path.join(os.path.dirname(__file__), 'accounts.json')):
-            with open(os.path.join(os.path.dirname(__file__), 'accounts.json'), "w") as f:
-                json.dump([],f,indent=4)
-        setting = {
-        "last_account": 1000
+    def create_account(self, owner: str, account_type: str) -> int:
+        if account_type not in {"savings", "current"}:
+            raise ValueError("Invalid account type")
+
+        data = self._read_data()
+        account_number = self._generate_account_number()
+
+        data[str(account_number)] = {
+            "owner": owner,
+            "type": account_type,
+            "balance": 0.0
         }
-        if not os.path.exists(os.path.join(os.path.dirname(__file__), 'settings.json')):
-            with open(os.path.join(os.path.dirname(__file__), 'settings.json'), "w") as f:
-                json.dump(setting,f,indent=4)
-     
-    #This method Loads Account numbers
-    def load_accounts(self):
-                with open(os.path.join(os.path.dirname(__file__), "accounts.json"), "r") as f:
-                    accounts = json.load(f)
-                return accounts
-                
-                
-    #   This Method loads the whole setting
-    def load_settings(self):
-          with open(os.path.join(os.path.dirname(__file__), "settings.json"), "r") as f:
-                    setting = json.load(f)
-          return setting          
-                
-                
-    # This method checks if the generated account number is unique 
-         
-    def is_unique(self,account):
-        accounts = self.load_accounts()
-        if accounts:
-            for a in accounts:
-                if a['account_number'] == account:
-                    return False
-        return True
-    
-    # This method returns the last account number 
-    
-    def last_account(self):
-        try:
-            setting = self.load_settings()
-            return setting['last_account']
-        except Exception as e:
-            print(f"Error happened while returning last account: {e}")
-            
-    #This method increments Account Number 
-    def increment_acc(self):
-        with open(os.path.join(os.path.dirname(__file__), "settings.json"), "r") as f:
-                    setting = json.load(f)
-        setting['last_account'] += 1
-        with open(os.path.join(os.path.dirname(__file__), "settings.json"), "w") as f:
-                    json.dump(setting,f,indent=4)
-    # This account generates account number
-    
-    def generate_account(self):
-        self.increment_acc()
-        return self.last_account()
-    def save_account(self):
-        full_name = self.first + self.last
-        account_number = self.generate_account()
-        
-bank = Bank("Beki","Chemeda",18)
+
+        self._write_data(data)
+        return account_number
+
+    def _load_account_object(self, account_number: int) -> Account:
+        data = self._read_data()
+        record = data.get(str(account_number))
+
+        if not record:
+            raise ValueError("Account not found")
+
+        if record["type"] == "savings":
+            return SavingsAccount(
+                account_number,
+                record["owner"],
+                record["balance"]
+            )
+
+        return CurrentAccount(
+            account_number,
+            record["owner"],
+            record["balance"]
+        )
+
+    def _save_balance(self, account: Account) -> None:
+        data = self._read_data()
+        data[str(account.account_number)]["balance"] = account.balance
+        self._write_data(data)
+
+    def deposit(self, account_number: int, amount: float) -> None:
+        account = self._load_account_object(account_number)
+        account.deposit(amount)
+        self._save_balance(account)
+
+    def withdraw(self, account_number: int, amount: float) -> None:
+        account = self._load_account_object(account_number)
+        account.withdraw(amount)
+        self._save_balance(account)
+
+    def get_account(self, account_number: int) -> dict:
+        data = self._read_data()
+        account = data.get(str(account_number))
+
+        if not account:
+            raise ValueError("Account not found")
+
+        return {
+            "account_number": account_number,
+            **account
+        }
+
