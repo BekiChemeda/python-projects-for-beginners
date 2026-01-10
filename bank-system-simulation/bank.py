@@ -1,6 +1,22 @@
 import json
+import logging
 from pathlib import Path
 from abc import ABC, abstractmethod
+
+
+# =========================
+# Logging Configuration
+# =========================
+
+LOG_FILE = Path(__file__).resolve().parent / "bank.log"
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+
+logger = logging.getLogger("BankSystem")
 
 
 # =========================
@@ -15,8 +31,20 @@ class Account(ABC):
 
     def deposit(self, amount: float) -> None:
         if amount <= 0:
+            logger.error(
+                "Invalid deposit amount: %s for account %s",
+                amount,
+                self.account_number,
+            )
             raise ValueError("Deposit amount must be positive")
+
         self.balance += amount
+        logger.info(
+            "Deposit | Account: %s | Amount: %.2f | New balance: %.2f",
+            self.account_number,
+            amount,
+            self.balance,
+        )
 
     @abstractmethod
     def withdraw(self, amount: float) -> None:
@@ -26,12 +54,29 @@ class Account(ABC):
 class SavingsAccount(Account):
     def withdraw(self, amount: float) -> None:
         if amount <= 0:
+            logger.error(
+                "Invalid withdrawal amount: %s for account %s",
+                amount,
+                self.account_number,
+            )
             raise ValueError("Withdrawal amount must be positive")
 
         if amount > self.balance:
+            logger.error(
+                "Insufficient funds | Account: %s | Requested: %.2f | Balance: %.2f",
+                self.account_number,
+                amount,
+                self.balance,
+            )
             raise ValueError("Insufficient funds")
 
         self.balance -= amount
+        logger.info(
+            "Withdrawal | Account: %s | Amount: %.2f | New balance: %.2f",
+            self.account_number,
+            amount,
+            self.balance,
+        )
 
 
 class CurrentAccount(Account):
@@ -40,19 +85,37 @@ class CurrentAccount(Account):
         account_number: int,
         owner: str,
         balance: float = 0.0,
-        overdraft_limit: float = 500.0
+        overdraft_limit: float = 500.0,
     ):
         super().__init__(account_number, owner, balance)
         self.overdraft_limit = overdraft_limit
 
     def withdraw(self, amount: float) -> None:
         if amount <= 0:
+            logger.error(
+                "Invalid withdrawal amount: %s for account %s",
+                amount,
+                self.account_number,
+            )
             raise ValueError("Withdrawal amount must be positive")
 
         if amount > self.balance + self.overdraft_limit:
+            logger.error(
+                "Overdraft exceeded | Account: %s | Requested: %.2f | Balance: %.2f | Limit: %.2f",
+                self.account_number,
+                amount,
+                self.balance,
+                self.overdraft_limit,
+            )
             raise ValueError("Overdraft limit exceeded")
 
         self.balance -= amount
+        logger.info(
+            "Withdrawal | Account: %s | Amount: %.2f | New balance: %.2f",
+            self.account_number,
+            amount,
+            self.balance,
+        )
 
 
 # =========================
@@ -65,6 +128,7 @@ class Bank:
     def __init__(self):
         if not self.DATA_FILE.exists():
             self._write_data({})
+            logger.info("Initialized new accounts data file")
 
     def _read_data(self) -> dict:
         with self.DATA_FILE.open("r", encoding="utf-8") as f:
@@ -80,6 +144,7 @@ class Bank:
 
     def create_account(self, owner: str, account_type: str) -> int:
         if account_type not in {"savings", "current"}:
+            logger.error("Invalid account type attempted: %s", account_type)
             raise ValueError("Invalid account type")
 
         data = self._read_data()
@@ -88,10 +153,18 @@ class Bank:
         data[str(account_number)] = {
             "owner": owner,
             "type": account_type,
-            "balance": 0.0
+            "balance": 0.0,
         }
 
         self._write_data(data)
+
+        logger.info(
+            "Account created | Account: %s | Owner: %s | Type: %s",
+            account_number,
+            owner,
+            account_type,
+        )
+
         return account_number
 
     def _load_account_object(self, account_number: int) -> Account:
@@ -99,19 +172,20 @@ class Bank:
         record = data.get(str(account_number))
 
         if not record:
+            logger.error("Account not found: %s", account_number)
             raise ValueError("Account not found")
 
         if record["type"] == "savings":
             return SavingsAccount(
                 account_number,
                 record["owner"],
-                record["balance"]
+                record["balance"],
             )
 
         return CurrentAccount(
             account_number,
             record["owner"],
-            record["balance"]
+            record["balance"],
         )
 
     def _save_balance(self, account: Account) -> None:
@@ -134,10 +208,12 @@ class Bank:
         account = data.get(str(account_number))
 
         if not account:
+            logger.error("Account lookup failed: %s", account_number)
             raise ValueError("Account not found")
+
+        logger.info("Account retrieved: %s", account_number)
 
         return {
             "account_number": account_number,
-            **account
+            **account,
         }
-
