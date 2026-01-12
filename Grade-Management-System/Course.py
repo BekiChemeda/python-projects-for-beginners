@@ -1,59 +1,58 @@
 import os
 import json
-import logging
 from utils import print_and_log, generate_id
 from datetime import datetime
 
-class Student:
+class Course:
     def __init__(self, file_name):
         self.file_name = os.path.join(os.path.dirname(__file__), file_name)
-        self.correct()
         self.ensure_file()
+
     def correct(self):
         return self.file_name.endswith(".json")
+
     def ensure_file(self):
         if self.correct():
             try:
                 if not os.path.exists(self.file_name):
                     with open(self.file_name, "w") as f:
                         json.dump([], f, indent=4)
-                    print_and_log("INFO","Student json file created and initiated",1 )
+                    print_and_log("INFO", "Course json file created and initiated", 1)
             except Exception as e:
                 print_and_log("ERROR", f"Error happened {e}", 1)
-    
 
-    def load_students(self):
+    def load_courses(self):
         try:
             with open(self.file_name, "r") as f:
-                students = json.load(f)
-            if students is None:
+                courses = json.load(f)
+            if courses is None:
                 return []
-            return students
+            return courses
         except (json.JSONDecodeError, FileNotFoundError):
             return []
 
-    def save_all(self, students):
+    def save_all(self, courses):
         with open(self.file_name, "w") as f:
-            json.dump(students, f, indent=4)
+            json.dump(courses, f, indent=4)
 
     def save(self, name):
         if not name.strip():
-            print_and_log("warning", "Name cannot be empty", 1)
-            return {"status": "failed",
-                    "message": "name cannot be empty"}
-        id = generate_id("students_id")
+            print_and_log("warning", "Course name cannot be empty", 1)
+            return {"status": "failed", "message": "name cannot be empty"}
+        
+        id = generate_id("courses_id")
         if id is None:
              return {"status": "failed", "message": "Failed to generate ID"}
 
-        student = {
+        course = {
             "id": id,
             "name": name,
             "created_at": datetime.now().isoformat()
         }
-        students = self.load_students()
-        students.append(student)
-        self.save_all(students)
-        return {"status": "success", "message": "Student created successfully", "data": student}
+        courses = self.load_courses()
+        courses.append(course)
+        self.save_all(courses)
+        return {"status": "success", "message": "Course created successfully", "data": course}
 
-    def get_all_students(self):
-        return self.load_students()
+    def get_all_courses(self):
+        return self.load_courses()
