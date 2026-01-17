@@ -13,3 +13,5 @@
 2025-12-31 09:36:06,917 - INFO - Student json file created and initiated
 2025-12-31 09:36:06,919 - ERROR - Error happened while incrementing and returning id: [Errno 13] Permission denied: 'ids.json'
 2026-01-02 12:40:37,039 - INFO - ids.json file created and initialized
+2026-01-12 20:53:54,834 - INFO - Course json file created and initiated
+2026-01-12 20:53:54,834 - INFO - Grade json file created and initiated
