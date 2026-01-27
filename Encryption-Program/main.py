@@ -1,7 +1,7 @@
 import random
-from string import punctuation, ascii_letters
+from string import punctuation, ascii_letters, digits
 
-chars = " " + str(1234567890) + punctuation + ascii_letters
+chars = " " +  digits + punctuation + ascii_letters
 
 chars = list(chars)
 keys = chars.copy()
